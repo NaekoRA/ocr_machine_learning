@@ -1,0 +1,57 @@
+{
+  "invoice_number": "006-112751001",
+  "tanggal": "01/11/2021",
+  "merchant": {
+    "name": "smarco superstore",
+    "address": null,
+    "phone": "061-80026661",
+    "email": null
+  },
+  "items": [
+    {
+      "id": null,
+      "name": null,
+      "ocr_result": {
+        "name": "sunlight lime refill 435 ml",
+        "quantity": 1,
+        "price": 9900,
+        "total": 9900,
+        "accuration": 0.39
+      }
+    },
+    {
+      "id": null,
+      "name": null,
+      "ocr_result": {
+        "name": "soklin pewangi biru pouch 1800 ml",
+        "quantity": 1,
+        "price": 25500,
+        "total": 25500,
+        "accuration": 0.45
+      }
+    },
+    {
+      "id": 20,
+      "name": "nivea extra whitening deodorant roll on 50ml",
+      "ocr_result": {
+        "name": "nivea adv.wht. anti ds f 50 ml",
+        "quantity": 1,
+        "price": 17500,
+        "total": 17500,
+        "accuration": 0.58
+      }
+    },
+    {
+      "id": null,
+      "name": null,
+      "ocr_result": {
+        "name": "konicare minyak telon plus 60 ml",
+        "quantity": 1,
+        "price": 25500,
+        "total": 25500,
+        "accuration": 0.47
+      }
+    }
+  ],
+  "grand_total": 78400
+}

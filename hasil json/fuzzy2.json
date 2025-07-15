@@ -1,0 +1,24 @@
+{
+  "invoice_number": "K01-20210826-0000075",
+  "tanggal": "26/08/2021",
+  "merchant": {
+    "name": "212 mart medan denai",
+    "address": "jl. denai - sp. datu kabu",
+    "phone": null,
+    "email": null
+  },
+  "items": [
+    {
+      "id": 7,
+      "name": "nivea men white oil clear anti shine facial foam 50ml",
+      "ocr_result": {
+        "name": "nivea ro e,white 50ml",
+        "quantity": 1,
+        "price": 20000,
+        "total": 20000,
+        "accuration": 0.86
+      }
+    }
+  ],
+  "grand_total": 20000
+}
