@@ -10,22 +10,24 @@ Install Dependency:
 --------------------
 > pip install -r requirements.txt
 
-Masuk ke Folder utama
+Masuk ke Folder utama 
 --------------------
 >cd utama
 
-di folder utama buat .env
+di folder utama edit .env
 --------------------
-contoh .env
+sesuaikan .env dengan username dan passwordmu
 ```# PostgreSQL Database Config
+# PostgreSQL Database Config
 DB_HOST=localhost
 DB_PORT=5432
 DB_DB=ocr
-DB_USER=YourDatabase
-DB_PASSWORD=YourPassword
+DB_USER=postgres#ganti dengan usernamemu
+DB_PASSWORD=pw#ganti dengan passwordmu
 
 # Google Generative AI
 GOOGLE_API_KEY=AIzaSyCG8IGd5lgD4m2UocqUGOyGtyd0jM6O4vU
+
 ```
 
 
