@@ -16,7 +16,7 @@ Masuk ke Folder utama
 
 di folder utama buat .env
 >contoh .env
-># PostgreSQL Database Config
+```# PostgreSQL Database Config
 DB_HOST=localhost
 DB_PORT=5432
 DB_DB=ocr
@@ -25,7 +25,7 @@ DB_PASSWORD=YourPassword
 
 # Google Generative AI
 GOOGLE_API_KEY=AIzaSyCG8IGd5lgD4m2UocqUGOyGtyd0jM6O4vU
-
+```
 
 
 Setup Database:
