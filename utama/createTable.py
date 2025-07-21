@@ -12,7 +12,6 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
-# Koneksi ke PostgreSQL
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,

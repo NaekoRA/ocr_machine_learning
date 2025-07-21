@@ -58,18 +58,40 @@ def OCR_Gemini(image_path):
     - daftar_barang (array of objects: nama, qty, harga_satuan, subtotal)
     - total_belanja (number)
     Jika ada informasi yang tidak jelas, isi dengan null.
-    Hanya kembalikan JSON-nya saja, tanpa penjelasan atau markdown formatting.
+    Hanya kembalikan JSON-nya saja, tanpa penjelasan atau markdown formatting.buat jadi lowercase
+    tambahan: buat jika ada angka di akhir misal "ce180" /"f50ml" jadi "ce 180ml"/ "f 50ml" agar nama barang tidak menyatu dengan volume, lalu jika tidakk ada ml misal "10" maka buat agar adamlnya "10ml" pastikan volume menyatu dengan angka misal "50ml".
+    
     """
     response = model_gemini.generate_content([prompt, img])
     text = response.text
     cleaned = re.sub(r'^```json|```$', '', text, flags=re.MULTILINE).strip()
     return json.loads(cleaned)
 
+def load_normalisasi_from_file(filepath='normalisasi.txt'):
+    normalisasi_map = {}
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and '=' in line:
+                    key, value = line.split('=', 1)
+                    normalisasi_map[key.strip()] = value.strip()
+    except FileNotFoundError:
+        print(f"Warning: normalisasi file not found at {filepath}. Normalization will not be applied.")
+    return normalisasi_map
+
+normalisasi = load_normalisasi_from_file()
+
+def normalize_text(text):
+    text = text.lower()
+    for k, v in normalisasi.items():
+        pattern = r'\b' + re.escape(k) + r'\b'
+        text = re.sub(pattern, v, text)
+    return text
 def match_items(items, descriptions, ids, prices, threshold=58):
     result = []
-
     for item in items:
-        nama_item = item['nama'].lower()
+        nama_item = normalize_text(item['nama'].lower())
         best_score = 0
         best_idx = None
 
