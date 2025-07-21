@@ -14,6 +14,20 @@ Masuk ke Folder utama
 --------------------
 >cd utama
 
+di folder utama buat .env
+>contoh .env
+># PostgreSQL Database Config
+DB_HOST=localhost
+DB_PORT=5432
+DB_DB=ocr
+DB_USER=YourDatabase
+DB_PASSWORD=YourPassword
+
+# Google Generative AI
+GOOGLE_API_KEY=AIzaSyCG8IGd5lgD4m2UocqUGOyGtyd0jM6O4vU
+
+
+
 Setup Database:
 ---------------
 1. Pastikan PostgreSQL 17 sudah terinstall & berjalan.
