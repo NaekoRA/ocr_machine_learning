@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS data_pusat (
     "Brand Group AS" TEXT,
     "Description" TEXT,
     "Barcode (Pieces)" NUMERIC,
-    "Harga PTT/Sebelum PPN" INT,
-    "Kuantiti per Karton/Dus" INT,
-    "Harga PPN" INT,
-    "Harga Jual ke Konsumen yg Disarankan" INT
+    "Harga PTT/Sebelum PPN" BIGINT,
+    "Kuantiti per Karton/Dus" BIGINT,
+    "Harga PPN" BIGINT,
+    "Harga Jual ke Konsumen yg Disarankan" BIGINT
 );
 """)
 conn.commit()
@@ -42,7 +42,8 @@ print("Tabel data_pusat siap digunakan.")
 
 # Baca data dari Excel SKUNivea.xlsx
 excel_file = 'SKUNivea.xlsx'
-df = pd.read_excel(excel_file)
+df = pd.read_excel(excel_file, usecols=range(9),skiprows=2,sheet_name='All NIVEA PL Mei 2024')
+df = df.dropna()
 
 # Insert data ke tabel data_pusat
 for index, row in df.iterrows():
