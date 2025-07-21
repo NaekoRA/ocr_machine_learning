@@ -10,18 +10,31 @@ Install Dependency:
 --------------------
 > pip install -r requirements.txt
 
-Masuk ke Folder utama
+Masuk ke Folder utama 
 --------------------
 >cd utama
+
+di folder utama edit .env
+--------------------
+sesuaikan .env dengan username dan passwordmu
+```# PostgreSQL Database Config
+# PostgreSQL Database Config
+DB_HOST=localhost
+DB_PORT=5432
+DB_DB=ocr
+DB_USER=postgres#ganti dengan usernamemu
+DB_PASSWORD=pw#ganti dengan passwordmu
+
+# Google Generative AI
+GOOGLE_API_KEY=AIzaSyCG8IGd5lgD4m2UocqUGOyGtyd0jM6O4vU
+
+```
+
 
 Setup Database:
 ---------------
 1. Pastikan PostgreSQL 17 sudah terinstall & berjalan.
-2. Buat database:
-> CREATE DATABASE strukAI;
-
-
-3. Jalankan script berikut **saat pertama kali setup** untuk:
+2. Jalankan script berikut **saat pertama kali setup** untuk:
    - Membuat tabel data_pusat jika belum ada.
    - Mengisi data dari file Excel SKUNivea.xlsx ke database.
 
