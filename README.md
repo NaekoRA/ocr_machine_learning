@@ -15,7 +15,8 @@ Masuk ke Folder utama
 >cd utama
 
 di folder utama buat .env
->contoh .env
+--------------------
+contoh .env
 ```# PostgreSQL Database Config
 DB_HOST=localhost
 DB_PORT=5432
