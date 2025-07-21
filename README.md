@@ -56,7 +56,9 @@ Pastikan:
 Menjalankan API Server:
 -----------------------
 > python struk.py
+
 atau:
+
 > uvicorn struk:app --reload
 
 
