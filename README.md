@@ -17,11 +17,7 @@ Masuk ke Folder utama
 Setup Database:
 ---------------
 1. Pastikan PostgreSQL 17 sudah terinstall & berjalan.
-2. Buat database:
-> CREATE DATABASE strukAI;
-
-
-3. Jalankan script berikut **saat pertama kali setup** untuk:
+2. Jalankan script berikut **saat pertama kali setup** untuk:
    - Membuat tabel data_pusat jika belum ada.
    - Mengisi data dari file Excel SKUNivea.xlsx ke database.
 
