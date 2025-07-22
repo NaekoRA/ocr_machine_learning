@@ -3,7 +3,7 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
-# Load environment variables dari .env
+# Load environment variables
 load_dotenv()
 
 DB_NAME = os.getenv("DB_DB")
@@ -12,6 +12,35 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
+def create_database_if_not_exists():
+    # Connect to default postgres DB
+    conn = psycopg2.connect(
+        dbname="postgres",
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    conn.autocommit = True
+    cursor = conn.cursor()
+
+    # Cek apakah DB_NAME sudah ada
+    cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_NAME,))
+    exists = cursor.fetchone()
+
+    if not exists:
+        cursor.execute(f'CREATE DATABASE "{DB_NAME}"')
+        print(f"Database '{DB_NAME}' berhasil dibuat.")
+    else:
+        print(f"Database '{DB_NAME}' sudah ada.")
+
+    cursor.close()
+    conn.close()
+
+# Step 1: Buat database jika belum ada
+create_database_if_not_exists()
+
+# Step 2: Connect ke DB yang dituju
 conn = psycopg2.connect(
     dbname=DB_NAME,
     user=DB_USER,
@@ -41,7 +70,7 @@ print("Tabel data_pusat siap digunakan.")
 
 # Baca data dari Excel SKUNivea.xlsx
 excel_file = 'SKUNivea.xlsx'
-df = pd.read_excel(excel_file, usecols=range(9),skiprows=2,sheet_name='All NIVEA PL Mei 2024')
+df = pd.read_excel(excel_file, usecols=range(9), skiprows=2, sheet_name='All NIVEA PL Mei 2024')
 df = df.dropna()
 
 # Insert data ke tabel data_pusat

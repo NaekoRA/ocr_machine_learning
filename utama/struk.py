@@ -11,6 +11,7 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import tempfile
+import nest_asyncio
 import uvicorn
 from dotenv import load_dotenv
 
