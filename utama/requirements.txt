@@ -7,4 +7,6 @@ fuzzywuzzy
 pandas
 sentence-transformers
 google-generativeai
-pandas
+nest_asyncio
+python-multipart
+pydantic
