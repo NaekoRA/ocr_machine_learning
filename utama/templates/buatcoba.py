@@ -87,8 +87,8 @@ try:
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS keywords (
         id SERIAL PRIMARY KEY,
-        keyword TEXT NOT NULL UNIQUE,          -- Singkatan/penulisan alternatif (e.g., 'srm', 'fcl foam')
-        normalized_value TEXT NOT NULL,      -- Bentuk normalisasi/standar (e.g., 'serum', 'facial foam')
+        keyword TEXT NOT NULL UNIQUE,          
+        normalized_value TEXT NOT NULL,      
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
@@ -124,8 +124,7 @@ try:
     # --- Membuat Tabel ocr_confirmations ---
     cursor.execute("""
     CREATE TABLE ocr_confirmations (
-    id SERIAL PRIMARY KEY,
-    receipt_id UUID UNIQUE, -- ← tambahan
+    receipt_id SERIAL PRIMARY KEY,
     receipt_data JSONB,
     matched_data JSONB,
     is_confirmed BOOLEAN DEFAULT FALSE,
