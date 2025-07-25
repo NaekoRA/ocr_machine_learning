@@ -131,6 +131,37 @@ def match_items(items, descriptions, ids, prices, keyword_map, threshold=58):
         result.append(matched_info)
     return result
 
+import re
+
+def clean_text(text: str) -> str:
+    # Lowercase, hapus simbol aneh, konsistenkan whitespace
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9& ]+', '', text)   # Hanya huruf, angka, spasi, &
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+def is_normalized_value_valid(normalized_value: str) -> bool:
+    cleaned_norm = clean_text(normalized_value)
+    try:
+        conn = get_db_conn()
+        with conn.cursor() as cur:
+            cur.execute('SELECT "Description" FROM data_pusat')
+            rows = cur.fetchall()
+            for row in rows:
+                desc_cleaned = clean_text(str(row[0]))
+                if cleaned_norm in desc_cleaned:
+                    print(f"[MATCH] '{cleaned_norm}' ditemukan di: {desc_cleaned}")
+                    return True
+                else:
+                    print(f"[NO MATCH] '{cleaned_norm}' tidak ada di: {desc_cleaned}")
+        return False
+    except Exception as e:
+        print(f"Error validating normalized_value: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
 # ---------- Models ----------
 class OCRResult(BaseModel):
     name: Optional[str]
@@ -299,7 +330,13 @@ async def get_all_keywords():
             conn.close()
 
 @app.post("/keywords")
-def add_keyword(data: KeywordRequest):
+def add_keyword(data: KeywordUpdate):
+    if not is_normalized_value_valid(data.normalized_value):
+        raise HTTPException(
+            status_code=400,
+            detail="normalized_value tidak ditemukan dalam deskripsi produk pusat."
+        )
+
     try:
         conn = get_db_conn()
         with conn.cursor() as cur:
@@ -322,7 +359,14 @@ def add_keyword(data: KeywordRequest):
             conn.close()
 
 @app.put("/keyword/{id}")
+@app.put("/keyword/{id}")
 async def update_keyword(id: int, kw_update: KeywordUpdate):
+    if not is_normalized_value_valid(kw_update.normalized_value):
+        raise HTTPException(
+            status_code=400,
+            detail="normalized_value tidak ditemukan dalam deskripsi produk pusat."
+        )
+
     try:
         conn = get_db_conn()
         with conn.cursor() as cur:
