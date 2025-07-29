@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1>Manajemen Kata Kunci</h1>
+    <h1>Manajemen keyword</h1>
 
     <div class="add-button-container">
       <button @click="openAddModal" class="add-new-keyword-button">
@@ -9,21 +9,40 @@
     </div>
 
     <div class="table-section">
-      <h2>Daftar Kata Kunci</h2>
+      <h2>Daftar keyword</h2>
+
+      <div class="search-wrapper">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Cari ID / keyword / normalized value..."
+          class="search-input"
+        />
+      </div>
+
       <table id="keywordTable">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>keywords</th>
-            <th>normalized_value</th>
+            <th @click="toggleSort('id')" style="cursor: pointer;">
+              ID
+              <span v-if="sortKey === 'id'">({{ sortOrder === 'asc' ? '↑' : '↓' }})</span>
+            </th>
+            <th @click="toggleSort('keyword')" style="cursor: pointer;">
+              keywords
+              <span v-if="sortKey === 'keyword'">({{ sortOrder === 'asc' ? '↑' : '↓' }})</span>
+            </th>
+            <th @click="toggleSort('normalized_value')" style="cursor: pointer;">
+              normalized_value
+              <span v-if="sortKey === 'normalized_value'">({{ sortOrder === 'asc' ? '↑' : '↓' }})</span>
+            </th>
             <th>actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="keywords.length === 0">
-            <td colspan="4" style="text-align: center;">Tidak ada kata kunci ditemukan.</td>
+          <tr v-if="filteredSortedKeywords.length === 0">
+            <td colspan="4" style="text-align: center;">Tidak ada keyword ditemukan.</td>
           </tr>
-          <tr v-for="kw in keywords" :key="kw.id">
+          <tr v-for="kw in filteredSortedKeywords" :key="kw.id">
             <td>{{ kw.id }}</td>
             <td>{{ kw.keyword }}</td>
             <td>{{ kw.normalized_value }}</td>
@@ -37,15 +56,17 @@
       <p v-if="tableMessage" :class="['message', tableMessageType]">{{ tableMessage }}</p>
     </div>
 
+    <!-- Modal Tambah/Edit -->
     <div v-if="showModal" class="modal-overlay">
       <div class="modal-content">
         <h2>{{ editingKeyword ? 'Edit keyword' : 'Tambah keyword Baru' }}</h2>
         <form @submit.prevent="handleSubmit">
           <input type="hidden" v-model="form.id">
-          <label for="keyword">Kata Kunci:</label>
+
+          <label for="keyword">keyword:</label>
           <input type="text" id="keyword" v-model="form.keyword" required>
 
-          <label for="normalizedValue">Nilai Normalisasi:</label>
+          <label for="normalizedValue">normalized value:</label>
           <div class="autocomplete-wrapper">
             <input
               type="text"
@@ -71,7 +92,7 @@
           </div>
 
           <div class="form-actions">
-            <button type="submit">{{ editingKeyword ? 'Update Kata Kunci' : 'Tambah Kata Kunci' }}</button>
+            <button type="submit">{{ editingKeyword ? 'Update keyword' : 'Tambah keyword' }}</button>
             <button type="button" @click="closeModal" class="cancel-button">Batal</button>
           </div>
         </form>
@@ -82,16 +103,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-const API_BASE_URL = 'http://127.0.0.1:8000'; // Pastikan ini sesuai dengan URL FastAPI Anda
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const keywords = ref([]);
-const form = ref({
-  id: null,
-  keyword: '',
-  normalized_value: '',
-});
+const form = ref({ id: null, keyword: '', normalized_value: '' });
 const editingKeyword = ref(false);
 const showModal = ref(false);
 const formMessage = ref('');
@@ -99,126 +116,113 @@ const formMessageType = ref('');
 const tableMessage = ref('');
 const tableMessageType = ref('');
 
-// Refs untuk saran dari Description data_pusat
-const allDescriptionSuggestions = ref([]); // Akan menyimpan semua deskripsi unik dari data_pusat
+const allDescriptionSuggestions = ref([]);
 const filteredSuggestions = ref([]);
-const activeSuggestionIndex = ref(-1); // Untuk navigasi keyboard
+const activeSuggestionIndex = ref(-1);
 
-// Fungsi untuk menampilkan pesan
-function showMessage(elementRef, message, type) {
-  if (elementRef === 'form') {
+const sortKey = ref('id');
+const sortOrder = ref('asc');
+
+const searchQuery = ref('');
+
+const sortedKeywords = computed(() => {
+  const sorted = [...keywords.value];
+  sorted.sort((a, b) => {
+    const aVal = a[sortKey.value];
+    const bVal = b[sortKey.value];
+    if (typeof aVal === 'string') {
+      return sortOrder.value === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    return sortOrder.value === 'asc' ? aVal - bVal : bVal - aVal;
+  });
+  return sorted;
+});
+
+// Filter setelah sortir
+const filteredSortedKeywords = computed(() => {
+  const query = searchQuery.value.toLowerCase();
+  return sortedKeywords.value.filter(kw =>
+    kw.id.toString().includes(query) ||
+    kw.keyword.toLowerCase().includes(query) ||
+    kw.normalized_value.toLowerCase().includes(query)
+  );
+});
+
+
+function toggleSort(key) {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortOrder.value = 'asc';
+  }
+}
+
+function showMessage(refName, message, type) {
+  if (refName === 'form') {
     formMessage.value = message;
     formMessageType.value = type;
-    setTimeout(() => {
-      formMessage.value = '';
-      formMessageType.value = '';
-    }, 5000);
-  } else if (elementRef === 'table') {
+    setTimeout(() => (formMessage.value = ''), 5000);
+  } else {
     tableMessage.value = message;
     tableMessageType.value = type;
-    setTimeout(() => {
-      tableMessage.value = '';
-      tableMessageType.value = '';
-    }, 5000);
+    setTimeout(() => (tableMessage.value = ''), 5000);
   }
 }
 
-// Mengambil data kata kunci dari API (untuk tabel utama)
 async function fetchKeywords() {
   try {
-    const response = await fetch(`${API_BASE_URL}/keywords`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    keywords.value = await response.json();
-    tableMessage.value = ''; // Hapus pesan jika berhasil dimuat
-  } catch (error) {
-    console.error('Error fetching keywords:', error);
-    showMessage('table', `Gagal memuat kata kunci: ${error.message}`, 'error');
+    const res = await fetch(`${API_BASE_URL}/keywords`);
+    keywords.value = await res.json();
+  } catch (err) {
+    showMessage('table', `Gagal memuat keyword: ${err.message}`, 'error');
   }
 }
 
-// FUNGSI BARU: Mengambil saran deskripsi dari endpoint FastAPI
 async function fetchDescriptionSuggestions() {
   try {
-    const response = await fetch(`${API_BASE_URL}/suggestions/descriptions`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    allDescriptionSuggestions.value = await response.json();
-  } catch (error) {
-    console.error('Error fetching description suggestions:', error);
+    const res = await fetch(`${API_BASE_URL}/suggestions/descriptions`);
+    allDescriptionSuggestions.value = await res.json();
+  } catch (err) {
+    console.error(err);
   }
 }
 
-// FUNGSI BARU: Memfilter saran berdasarkan input deskripsi (bukan normalized_value dari keywords)
 function filterDescriptionSuggestions() {
-  const input = form.value.normalized_value;
-  const words = input.split(/\s+/); // pisah berdasarkan spasi
-  const currentWord = words[words.length - 1].toLowerCase(); // ambil kata terakhir
-
-  if (currentWord.length === 0) {
-    filteredSuggestions.value = [];
-    activeSuggestionIndex.value = -1;
-    return;
-  }
-
-  filteredSuggestions.value = allDescriptionSuggestions.value.filter(val =>
-    val.toLowerCase().includes(currentWord)
-  ).sort((a, b) => {
-    const aLower = a.toLowerCase();
-    const bLower = b.toLowerCase();
-    if (aLower.startsWith(currentWord) && !bLower.startsWith(currentWord)) return -1;
-    if (!aLower.startsWith(currentWord) && bLower.startsWith(currentWord)) return 1;
-    return a.localeCompare(b);
-  });
-
+  const currentWord = form.value.normalized_value.trim().split(/\s+/).pop().toLowerCase();
+  if (!currentWord) return (filteredSuggestions.value = []);
+  filteredSuggestions.value = allDescriptionSuggestions.value
+    .filter(val => val.toLowerCase().includes(currentWord))
+    .sort((a, b) => a.toLowerCase().startsWith(currentWord) ? -1 : 1);
   activeSuggestionIndex.value = -1;
 }
 
-
-// Fungsi untuk memilih saran dari daftar
-function selectSuggestion(suggestion) {
+function selectSuggestion(s) {
   const words = form.value.normalized_value.trim().split(/\s+/);
-  words[words.length - 1] = suggestion; // ganti kata terakhir
-  form.value.normalized_value = words.join(' ') + ' '; // tambahkan spasi agar bisa lanjut ketik
+  words[words.length - 1] = s;
+  form.value.normalized_value = words.join(' ') + ' ';
   filteredSuggestions.value = [];
   activeSuggestionIndex.value = -1;
 }
 
-
-// Navigasi dengan keyboard (atas/bawah)
-function navigateSuggestions(direction) {
-  if (filteredSuggestions.value.length === 0) return;
-
-  activeSuggestionIndex.value += direction;
-
-  if (activeSuggestionIndex.value < 0) {
-    activeSuggestionIndex.value = filteredSuggestions.value.length - 1;
-  } else if (activeSuggestionIndex.value >= filteredSuggestions.value.length) {
-    activeSuggestionIndex.value = 0;
-  }
-
-  // Opsional: Scroll ke item yang aktif (untuk daftar yang panjang)
-  const activeElement = document.querySelector('.suggestions-list li.active');
-  if (activeElement) {
-    activeElement.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  }
+function navigateSuggestions(dir) {
+  if (!filteredSuggestions.value.length) return;
+  activeSuggestionIndex.value += dir;
+  const total = filteredSuggestions.value.length;
+  if (activeSuggestionIndex.value < 0) activeSuggestionIndex.value = total - 1;
+  if (activeSuggestionIndex.value >= total) activeSuggestionIndex.value = 0;
 }
 
-// Memilih saran aktif (dengan Enter)
 function selectActiveSuggestion() {
-  if (activeSuggestionIndex.value !== -1 && filteredSuggestions.value.length > 0) {
+  if (activeSuggestionIndex.value !== -1) {
     selectSuggestion(filteredSuggestions.value[activeSuggestionIndex.value]);
   } else if (filteredSuggestions.value.length > 0) {
-    // Jika tidak ada yang aktif tapi ada saran, pilih yang pertama
     selectSuggestion(filteredSuggestions.value[0]);
   }
-  // Jika Enter ditekan dan tidak ada saran atau tidak ada yang aktif, form akan mencoba submit secara normal.
 }
 
-
-// Menangani submit formulir (Tambah/Edit)
 async function handleSubmit() {
   const url = form.value.id
     ? `${API_BASE_URL}/keyword/${form.value.id}`
@@ -226,101 +230,65 @@ async function handleSubmit() {
   const method = form.value.id ? 'PUT' : 'POST';
 
   try {
-    const response = await fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        keyword: form.value.keyword,
-        normalized_value: form.value.normalized_value,
-      }),
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form.value),
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.detail || `HTTP error! status: ${response.status}`);
-    }
-
-    showMessage('form', result.message || 'Operasi berhasil!', 'success');
-    closeModal(); // Tutup modal saat berhasil
-    await fetchKeywords(); // Muat ulang daftar kata kunci
-  } catch (error) {
-    console.error('Error saving keyword:', error);
-    showMessage('form', `Gagal menyimpan kata kunci: ${error.message}`, 'error');
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.detail || 'Gagal menyimpan');
+    showMessage('form', 'Berhasil disimpan', 'success');
+    closeModal();
+    await fetchKeywords();
+  } catch (err) {
+    showMessage('form', `Gagal: ${err.message}`, 'error');
   }
 }
 
-// Membuka modal untuk menambah kata kunci baru
 function openAddModal() {
-  resetForm(); // Pastikan form bersih untuk entri baru
+  resetForm();
   editingKeyword.value = false;
   showModal.value = true;
-  filteredSuggestions.value = []; // Bersihkan saran
+  filteredSuggestions.value = [];
 }
 
-// Mengisi formulir dan membuka modal untuk edit
 function editKeyword(kw) {
-  form.value.id = kw.id;
-  form.value.keyword = kw.keyword;
-  form.value.normalized_value = kw.normalized_value;
+  form.value = { ...kw };
   editingKeyword.value = true;
-  showModal.value = true; // Tampilkan modal untuk edit
-  filteredSuggestions.value = []; // Bersihkan saran
+  showModal.value = true;
+  filteredSuggestions.value = [];
 }
 
-// Menutup modal dan mereset formulir
 function closeModal() {
   showModal.value = false;
   resetForm();
-  filteredSuggestions.value = []; // Bersihkan saran saat ditutup
+  filteredSuggestions.value = [];
 }
 
-// Mereset formulir
 function resetForm() {
-  form.value = {
-    id: null,
-    keyword: '',
-    normalized_value: '',
-  };
-  editingKeyword.value = false;
+  form.value = { id: null, keyword: '', normalized_value: '' };
   formMessage.value = '';
   formMessageType.value = '';
 }
 
-// Menghapus kata kunci
 async function deleteKeyword(id) {
-  if (!confirm('Apakah Anda yakin ingin menghapus kata kunci ini?')) {
-    return;
-  }
-
+  if (!confirm('Yakin ingin hapus?')) return;
   try {
-    const response = await fetch(`${API_BASE_URL}/keywords/${id}`, {
-      method: 'DELETE',
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.detail || `HTTP error! status: ${response.status}`);
-    }
-
-    showMessage('table', result.message || 'Kata kunci berhasil dihapus!', 'success');
-    await fetchKeywords(); // Muat ulang daftar
-  } catch (error) {
-    console.error('Error deleting keyword:', error);
-    showMessage('table', `Gagal menghapus kata kunci: ${error.message}`, 'error');
+    const res = await fetch(`${API_BASE_URL}/keywords/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.detail || 'Gagal menghapus');
+    showMessage('table', 'Berhasil dihapus', 'success');
+    await fetchKeywords();
+  } catch (err) {
+    showMessage('table', `Gagal: ${err.message}`, 'error');
   }
 }
 
-// Panggil fetchKeywords DAN fetchDescriptionSuggestions saat komponen dimuat
 onMounted(() => {
   fetchKeywords();
-  fetchDescriptionSuggestions(); // Panggil fungsi baru ini untuk mendapatkan saran
+  fetchDescriptionSuggestions();
 });
 </script>
-
 <style scoped>
 /* Anda bisa menempatkan CSS yang sama dari style.css Anda di sini,
     atau membuat file CSS global dan mengimpornya di nuxt.config.ts */

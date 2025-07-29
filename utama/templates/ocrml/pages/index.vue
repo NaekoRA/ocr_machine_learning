@@ -23,12 +23,7 @@
     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
     <div v-if="results.length > 0" class="results-container">
-      <div class="navigation-buttons">
-        <button @click="showPrevStruk" :disabled="currentStrukIndex === 0">Sebelumnya</button>
-        <span>Struk {{ currentStrukIndex + 1 }} dari {{ results.length }}</span>
-        <button @click="showNextStruk" :disabled="currentStrukIndex === results.length - 1">Berikutnya</button>
-      </div>
-
+      
       <div class="result-card">
         <template v-if="results[currentStrukIndex].error">
           <h3>Hasil Struk {{ currentStrukIndex + 1 }} (Error)</h3>
@@ -51,7 +46,7 @@
               <span><strong>Qty:</strong> {{ item.ocr_result?.quantity || 'N/A' }}</span>
               <span><strong>Harga Satuan:</strong> {{ formatCurrency(item.ocr_result?.price) || 'N/A' }}</span>
               <span><strong>Subtotal:</strong> {{ formatCurrency(item.ocr_result?.total) || 'N/A' }}</span>
-
+              
               <!-- Tambahan Akurasi -->
               <span><strong>Final Accuracy:</strong> {{ item.ocr_result?.Final_accuracy !== null &&
                 item.ocr_result?.Final_accuracy !== undefined ? (item.ocr_result.Final_accuracy * 100).toFixed(2) + '%'
@@ -66,9 +61,9 @@
 
 <!-- Cocok atau tidak -->
 <template v-if="item.id !== null && item.id !== undefined">
-                <span><strong>Matched ID:</strong> {{ item.id }}</span>
-                <span><strong>Matched Name:</strong> {{ item.name }}</span>
-                <span><strong>Harga di Data Pusat:</strong> {{ formatCurrency(item.harga_di_datapusat) || 'N/A'
+  <span><strong>Matched ID:</strong> {{ item.id }}</span>
+  <span><strong>Matched Name:</strong> {{ item.name }}</span>
+  <span><strong>Harga di Data Pusat:</strong> {{ formatCurrency(item.harga_di_datapusat) || 'N/A'
                 }}</span>
               </template>
               <template v-else>
@@ -83,6 +78,11 @@
           </ul>
           <p><strong>Grand Total:</strong> {{ formatCurrency(results[currentStrukIndex].grand_total) || 'N/A' }}</p>
         </template>
+      </div>
+      <div class="navigation-buttons">
+        <button @click="showPrevStruk" :disabled="currentStrukIndex === 0">Sebelumnya</button>
+        <span>Struk {{ currentStrukIndex + 1 }} dari {{ results.length }}</span>
+        <button @click="showNextStruk" :disabled="currentStrukIndex === results.length - 1">Berikutnya</button>
       </div>
     </div>
   </div>

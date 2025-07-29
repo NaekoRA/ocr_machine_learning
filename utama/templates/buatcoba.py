@@ -121,23 +121,49 @@ try:
     print("Trigger 'update_keywords_timestamp' untuk tabel keywords siap digunakan.")
 
 
-    # --- Membuat Tabel ocr_confirmations ---
+   # ... bagian import dan dotenv tetap ...
+
+# --- DI DALAM BLOK `try:` utama SESUDAH keywords ---
+    # --- Membuat Tabel ocr_receipts dan ocr_items ---
     cursor.execute("""
-    CREATE TABLE ocr_confirmations (
-    receipt_id SERIAL PRIMARY KEY,
-    receipt_data JSONB,
-    matched_data JSONB,
-    is_confirmed BOOLEAN DEFAULT FALSE,
-    is_correct BOOLEAN,
-    feedback TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    confirmed_at TIMESTAMP
-);
+    CREATE TABLE IF NOT EXISTS ocr_receipts (
+        id SERIAL PRIMARY KEY,
+        invoice_number TEXT,
+        tanggal DATE,
+        nama_toko TEXT,
+        alamat TEXT,
+        phone TEXT,
+        email TEXT,
+        total_belanja BIGINT,
+        is_confirmed BOOLEAN DEFAULT FALSE,
+        feedback TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        confirmed_at TIMESTAMP
+    );
     """)
     conn.commit()
-    print("Tabel ocr_confirmations siap digunakan.")
+    print("Tabel ocr_receipts siap digunakan.")
 
-    # Baca data dari Excel SKUNivea.xlsx
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ocr_items (
+        id SERIAL PRIMARY KEY,
+        receipt_id INTEGER REFERENCES ocr_receipts(id) ON DELETE CASCADE,
+        ocr_name TEXT,
+        ocr_quantity NUMERIC,
+        ocr_price BIGINT,
+        ocr_total BIGINT,
+        accuration FLOAT,
+        matched_item_id INTEGER,
+        matched_name TEXT,
+        keywords TEXT[],
+        is_correct BOOLEAN,
+        feedback TEXT,
+        confirmed_at TIMESTAMP
+    );
+    """)
+    conn.commit()
+    print("Tabel ocr_items siap digunakan.")
+
     excel_file = 'SKU.xlsx'
     try:
         df = pd.read_excel(excel_file, usecols=range(9), skiprows=2, sheet_name='All NIVEA PL Mei 2024')

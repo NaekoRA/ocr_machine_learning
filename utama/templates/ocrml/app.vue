@@ -12,9 +12,6 @@
     <main class="main-content">
       <NuxtPage />
     </main>
-    <footer class="app-footer">
-      <p>&copy; {{ new Date().getFullYear() }} Struk Scanner App</p>
-    </footer>
   </div>
 </template>
 
@@ -47,6 +44,7 @@ html, body {
 /* --- NAVBAR STYLING --- */
 .navbar {
   display: flex;
+  position: fixed;
   justify-content: space-between;
   align-items: center;
   background-color: #2c3e50;
@@ -55,6 +53,7 @@ html, body {
   flex-shrink: 0; /* Agar navbar tidak menyusut */
   width: 100%; /* Memastikan navbar mengisi seluruh lebar */
   box-sizing: border-box;
+  z-index: 999;
 }
 
 .nav-brand {
