@@ -1,6 +1,11 @@
 OCR STRUK BELANJA API
 ======================
 
+sistem auto register keyword 
+koreksi matching item
+File:main/testocr3
+========================
+
 Requirement:
 ------------
 - Python 3.11.9
@@ -80,5 +85,4 @@ Selesai.
 
 
 perbaruan:
-sistem auto register keyword 
-koreksi matching item
+
