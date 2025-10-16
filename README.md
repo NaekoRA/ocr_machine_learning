@@ -1,8 +1,9 @@
 OCR STRUK BELANJA API
 ======================
 
-sistem auto register keyword 
-koreksi matching item
+Update:
+-sistem auto register keyword 
+-koreksi matching item
 File:main/testocr3
 ========================
 
@@ -84,5 +85,5 @@ Selesai.
 
 
 
-perbaruan:
+
 
