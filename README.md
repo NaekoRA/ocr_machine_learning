@@ -8,10 +8,10 @@ Update:
 File:main/testocr3
 ========================
 cara menjalankan:
-- cd main
-- cd testocr3
-- pip install -r requirements.txt
-- py coba.py
+> cd main
+> cd testocr3
+> pip install -r requirements.txt
+> py coba.py
 
 
 Requirement:
